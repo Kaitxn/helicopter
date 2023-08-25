@@ -1,9 +1,10 @@
 #include <stdio.h>
 
 int main() {
-        double num1;
+    double num1;
     double num2;
-        printf(" __________\n");
+
+    printf(" __________\n");
     printf("| ________ |\n");
     printf("||12345678||\n");
     printf("|\"\"\"\"\"\"\"\"\"\"|\n");
@@ -14,10 +15,10 @@ int main() {
     printf("|[.|O|:][=]|\n");
     printf("\"----------\"\n");
     printf("first number: ");
-    scanf ("%lf", &num1);
+    scanf("%lf", &num1);
     printf("second number: ");
-    scanf ("%lf", &num2);
+    scanf("%lf", &num2);
 
-printf("Answer: %f", num1 + num2);
-printf(" la dumbass");
+    printf("Answer: %lf", num1 + num2);
+    printf(" la dumbass");
 }
