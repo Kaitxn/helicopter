@@ -2,8 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <time.h>
 
 #define MAX_HABITS 10000
+#define DB_FILE "db.csv"
 
 char **str_split(char *a_str, const char a_delim)
 {
@@ -57,6 +59,8 @@ typedef struct
 {
     char *name;
     int interval_day;
+    int notification_hour;
+    int notification_min;
 } Habit;
 
 int main(int argc, char *argv[])
@@ -64,12 +68,12 @@ int main(int argc, char *argv[])
     FILE *fptr;
 
     // Open a file for reading habits
-    fptr = fopen("db.csv", "r");
+    fptr = fopen(DB_FILE, "r");
 
     // This is to handle if there is error opening the file
     if (fptr == NULL)
     {
-        fprintf(stderr, "Failed to open file at db.csv");
+        fprintf(stderr, "Failed to open file at %s", DB_FILE);
         return 1;
     }
 
@@ -87,7 +91,14 @@ int main(int argc, char *argv[])
         if (tokens == NULL)
             continue;
 
-        habits[i] = (Habit){.name = tokens[0], .interval_day = atoi(tokens[1])};
+        char **time_tokens = str_split(tokens[2], ':');
+
+        habits[i] = (Habit){
+            .name = tokens[0],
+            .interval_day = atoi(tokens[1]),
+            .notification_hour = atoi(time_tokens[0]),
+            .notification_min = atoi(time_tokens[1])};
+
         i++;
 
         free(tokens);
@@ -98,24 +109,31 @@ int main(int argc, char *argv[])
     if (argc == 2 && strcmp(argv[1], "add") == 0)
     {
         // Open a file for storing habits
-        fptr = fopen("db.csv", "a");
+        fptr = fopen(DB_FILE, "a");
 
         // This is to handle if there is error opening the file
         if (fptr == NULL)
         {
-            fprintf(stderr, "Failed to open file at db.csv");
+            fprintf(stderr, "Failed to open file at %s", DB_FILE);
             return 1;
         }
 
-        Habit habit = {.name = (char *)malloc(100 * sizeof(char)), .interval_day = 0};
+        Habit habit = {
+            .name = (char *)malloc(100 * sizeof(char)),
+            .interval_day = 0,
+            .notification_hour = 0,
+            .notification_min = 0};
 
         printf("What habit do you want to add?: ");
         scanf("%s", habit.name);
 
-        printf("What is the interval of the habit?: ");
+        printf("What is the interval day of the habit?: ");
         scanf("%d", &habit.interval_day);
 
-        fprintf(fptr, "%s,%d\n", habit.name, habit.interval_day);
+        printf("What is the notification time of the habit? (eg. 20:00): ");
+        scanf("%d:%d", &habit.notification_hour, &habit.notification_min);
+
+        fprintf(fptr, "%s,%d,%02d:%02d\n", habit.name, habit.interval_day, habit.notification_hour, habit.notification_min);
 
         printf("Habit %s added.", habit.name);
 
@@ -156,7 +174,7 @@ int main(int argc, char *argv[])
             habits[MAX_HABITS - 1].interval_day = 0;
 
             // Open the file to rewrite the habits
-            fptr = fopen("db.csv", "w");
+            fptr = fopen(DB_FILE, "w");
 
             // Write the habits back to the file
             for (int i = 0; habits[i].name != NULL; i++)
@@ -182,7 +200,7 @@ int main(int argc, char *argv[])
         {
             if (habits[i].name == NULL)
                 break;
-            printf("Habit %d: %s (%d days)\n", i + 1, habits[i].name, habits[i].interval_day);
+            printf("Habit %d: %s (%d days) %02d:%02d\n", i + 1, habits[i].name, habits[i].interval_day, habits[i].notification_hour, habits[i].notification_min);
         }
 
         return 0;
